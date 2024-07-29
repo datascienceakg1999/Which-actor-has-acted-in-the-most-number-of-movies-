@@ -1,0 +1,37 @@
+import pandas as pd
+
+
+data = {
+    'movie': ['Movie1', 'Movie2', 'Movie3', 'Movie4', 'Movie5', 'Movie6'],
+    'actors': ['ActorA,ActorB', 'ActorA,ActorC', 'ActorB,ActorC', 'ActorA', 'ActorB,ActorD', 'ActorC'],
+    'genres': ['Action,Adventure', 'Comedy,Drama', 'Action,Thriller', 'Drama,Thriller', 'Action,Drama', 'Comedy'],
+    'revenue': [1000, 1200, 500, 700, 800, 900],
+    'cost': [200, 300, 100, 150, 200, 250]
+}
+
+df = pd.DataFrame(data)
+
+df_exploded = df.assign(actor=df['actors'].str.split(',')).explode('actor')
+
+actor_movie_counts = df_exploded['actor'].value_counts()
+top_actor = actor_movie_counts.idxmax()
+top_actor_movie_count = actor_movie_counts.max()
+
+print(f"The actor with the most movies is {top_actor} with {top_actor_movie_count} movies.")
+
+
+top_actor_movies = df_exploded[df_exploded['actor'] == top_actor]
+
+
+top_actor_movies['ROI'] = (top_actor_movies['revenue'] - top_actor_movies['cost']) / top_actor_movies['cost']
+top_actor_genres = top_actor_movies['genres'].str.split(',').explode().unique()
+top_actor_profits = top_actor_movies[['movie', 'revenue', 'cost', 'ROI']]
+
+print(f"\nMovies featuring {top_actor}:")
+print(top_actor_movies['movie'].unique())
+
+print(f"\nGenres of movies featuring {top_actor}:")
+print(top_actor_genres)
+
+print(f"\nProfits of movies featuring {top_actor}:")
+print(top_actor_profits)
